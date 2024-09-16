@@ -115,4 +115,14 @@ class User
 
         return $stmt;
     }
+
+    public function isUnique($username)
+    {
+        $query = "SELECT COUNT(*)FROM " . $this->table_name . " WHERE  Username = :username;";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        return $query;
+    }
 }
