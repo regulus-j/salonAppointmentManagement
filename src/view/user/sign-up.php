@@ -80,7 +80,7 @@
 <body>
     <div class="login-container">
         <h1>Login</h1>
-        <form action="login.php" method="post">
+        <form action="../../controller/login.php" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
 
