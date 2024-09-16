@@ -1,6 +1,7 @@
 <?php
 
-class User {
+class User
+{
     private $conn;
     private $table_name = "User";
 
@@ -14,15 +15,17 @@ class User {
     public $CreatedAt;
     public $UpdatedAt;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    public function add() {
+    public function add()
+    {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET Username=:username, PasswordHash=:passwordhash, Email=:email, 
                       UserType=:usertype, IsActive=:isactive";
-        
+
         $stmt = $this->conn->prepare($query);
 
         $this->Username = htmlspecialchars(strip_tags($this->Username));
@@ -37,18 +40,19 @@ class User {
         $stmt->bindParam(":usertype", $this->UserType);
         $stmt->bindParam(":isactive", $this->IsActive);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             return true;
         }
         return false;
     }
 
-    public function update() {
+    public function update()
+    {
         $query = "UPDATE " . $this->table_name . "
                   SET Username=:username, Email=:email, UserType=:usertype, 
                       IsActive=:isactive, LastLogin=:lastlogin
                   WHERE UserID=:userid";
-        
+
         $stmt = $this->conn->prepare($query);
 
         $this->Username = htmlspecialchars(strip_tags($this->Username));
@@ -65,36 +69,50 @@ class User {
         $stmt->bindParam(":lastlogin", $this->LastLogin);
         $stmt->bindParam(":userid", $this->UserID);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             return true;
         }
         return false;
     }
 
-    public function delete() {
+    public function delete()
+    {
         $query = "DELETE FROM " . $this->table_name . " WHERE UserID = ?";
         $stmt = $this->conn->prepare($query);
         $this->UserID = htmlspecialchars(strip_tags($this->UserID));
         $stmt->bindParam(1, $this->UserID);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             return true;
         }
         return false;
     }
 
-    public function fetch($id = null) {
+    public function fetch($id = null)
+    {
         $query = "SELECT * FROM " . $this->table_name;
-        if($id) {
+        if ($id) {
             $query .= " WHERE UserID = ?";
         }
         $stmt = $this->conn->prepare($query);
-        
-        if($id) {
+
+        if ($id) {
             $stmt->bindParam(1, $id);
         }
 
         $stmt->execute();
+        return $stmt;
+    }
+
+    public function fetchByUsername($username)
+    {
+        $query = "SELECT UserID, Username, PasswordHash, Email, UserType FROM " . $this->table_name . " WHERE Username = :username";
+
+        $stmt = $this->conn->prepare($query);
+        $username = htmlspecialchars(strip_tags($username));
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+
         return $stmt;
     }
 }
