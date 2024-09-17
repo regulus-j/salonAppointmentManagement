@@ -1,6 +1,7 @@
 <?php
 
-class Appointment {
+class Appointment
+{
     private $conn;
     private $table_name = "Appointment";
 
@@ -14,15 +15,17 @@ class Appointment {
     public $CreatedAt;
     public $UpdatedAt;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    public function add() {
+    public function add()
+    {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid, 
                       AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes";
-        
+
         $stmt = $this->conn->prepare($query);
 
         $this->CustomerID = htmlspecialchars(strip_tags($this->CustomerID));
@@ -39,18 +42,19 @@ class Appointment {
         $stmt->bindParam(":status", $this->Status);
         $stmt->bindParam(":notes", $this->Notes);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             return true;
         }
         return false;
     }
 
-    public function update() {
+    public function update()
+    {
         $query = "UPDATE " . $this->table_name . "
                   SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid, 
                       AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes
                   WHERE AppointmentID=:appointmentid";
-        
+
         $stmt = $this->conn->prepare($query);
 
         $this->CustomerID = htmlspecialchars(strip_tags($this->CustomerID));
@@ -69,32 +73,34 @@ class Appointment {
         $stmt->bindParam(":notes", $this->Notes);
         $stmt->bindParam(":appointmentid", $this->AppointmentID);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             return true;
         }
         return false;
     }
 
-    public function delete() {
+    public function delete()
+    {
         $query = "DELETE FROM " . $this->table_name . " WHERE AppointmentID = ?";
         $stmt = $this->conn->prepare($query);
         $this->AppointmentID = htmlspecialchars(strip_tags($this->AppointmentID));
         $stmt->bindParam(1, $this->AppointmentID);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             return true;
         }
         return false;
     }
 
-    public function fetch($id = null) {
+    public function fetch($id = null)
+    {
         $query = "SELECT * FROM " . $this->table_name;
-        if($id) {
+        if ($id) {
             $query .= " WHERE AppointmentID = ?";
         }
         $stmt = $this->conn->prepare($query);
-        
-        if($id) {
+
+        if ($id) {
             $stmt->bindParam(1, $id);
         }
 
