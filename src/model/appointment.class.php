@@ -20,63 +20,111 @@ class Appointment
         $this->conn = $db;
     }
 
+    public function validateInput()
+    {
+        if (empty($this->CustomerID) || !is_numeric($this->CustomerID)) {
+            throw new InvalidArgumentException("Invalid Customer ID");
+        }
+        if (empty($this->StaffID) || !is_numeric($this->StaffID)) {
+            throw new InvalidArgumentException("Invalid Staff ID");
+        }
+        if (empty($this->ServiceID) || !is_numeric($this->ServiceID)) {
+            throw new InvalidArgumentException("Invalid Service ID");
+        }
+        if (!strtotime($this->AppointmentDateTime)) {
+            throw new InvalidArgumentException("Invalid Appointment Date/Time");
+        }
+        $validStatuses = ['Scheduled', 'Completed', 'Cancelled'];
+        if (!in_array($this->Status, $validStatuses)) {
+            throw new InvalidArgumentException("Invalid Status");
+        }
+    }
+
     public function add()
     {
-        $query = "INSERT INTO " . $this->table_name . " 
-                  SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid, 
-                      AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes";
+        try {
+            $this->validateInput();
 
-        $stmt = $this->conn->prepare($query);
-
-        $this->CustomerID = htmlspecialchars(strip_tags($this->CustomerID));
-        $this->StaffID = htmlspecialchars(strip_tags($this->StaffID));
-        $this->ServiceID = htmlspecialchars(strip_tags($this->ServiceID));
-        $this->AppointmentDateTime = htmlspecialchars(strip_tags($this->AppointmentDateTime));
-        $this->Status = htmlspecialchars(strip_tags($this->Status));
-        $this->Notes = htmlspecialchars(strip_tags($this->Notes));
-
-        $stmt->bindParam(":customerid", $this->CustomerID);
-        $stmt->bindParam(":staffid", $this->StaffID);
-        $stmt->bindParam(":serviceid", $this->ServiceID);
-        $stmt->bindParam(":appointmentdatetime", $this->AppointmentDateTime);
-        $stmt->bindParam(":status", $this->Status);
-        $stmt->bindParam(":notes", $this->Notes);
-
-        if ($stmt->execute()) {
-            return true;
+            $query = "INSERT INTO " . $this->table_name . "
+                      SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid,
+                          AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes";
+            
+            $stmt = $this->conn->prepare($query);
+            
+            // Sanitize inputs
+            $this->CustomerID = htmlspecialchars(strip_tags($this->CustomerID));
+            $this->StaffID = htmlspecialchars(strip_tags($this->StaffID));
+            $this->ServiceID = htmlspecialchars(strip_tags($this->ServiceID));
+            $this->AppointmentDateTime = htmlspecialchars(strip_tags($this->AppointmentDateTime));
+            $this->Status = htmlspecialchars(strip_tags($this->Status));
+            $this->Notes = htmlspecialchars(strip_tags($this->Notes));
+            
+            // Bind parameters
+            $stmt->bindParam(":customerid", $this->CustomerID);
+            $stmt->bindParam(":staffid", $this->StaffID);
+            $stmt->bindParam(":serviceid", $this->ServiceID);
+            $stmt->bindParam(":appointmentdatetime", $this->AppointmentDateTime);
+            $stmt->bindParam(":status", $this->Status);
+            $stmt->bindParam(":notes", $this->Notes);
+            
+            if ($stmt->execute()) {
+                return true;
+            }
+            return false;
+        } catch (InvalidArgumentException $e) {
+            // Log the error and return false or throw a custom exception
+            error_log("Validation error in Appointment::add(): " . $e->getMessage());
+            return false;
+        } catch (PDOException $e) {
+            // Log the database error and return false or throw a custom exception
+            error_log("Database error in Appointment::add(): " . $e->getMessage());
+            return false;
         }
-        return false;
     }
 
     public function update()
     {
-        $query = "UPDATE " . $this->table_name . "
-                  SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid, 
-                      AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes
-                  WHERE AppointmentID=:appointmentid";
+        try {
+            $this->validateInput();
 
-        $stmt = $this->conn->prepare($query);
-
-        $this->CustomerID = htmlspecialchars(strip_tags($this->CustomerID));
-        $this->StaffID = htmlspecialchars(strip_tags($this->StaffID));
-        $this->ServiceID = htmlspecialchars(strip_tags($this->ServiceID));
-        $this->AppointmentDateTime = htmlspecialchars(strip_tags($this->AppointmentDateTime));
-        $this->Status = htmlspecialchars(strip_tags($this->Status));
-        $this->Notes = htmlspecialchars(strip_tags($this->Notes));
-        $this->AppointmentID = htmlspecialchars(strip_tags($this->AppointmentID));
-
-        $stmt->bindParam(":customerid", $this->CustomerID);
-        $stmt->bindParam(":staffid", $this->StaffID);
-        $stmt->bindParam(":serviceid", $this->ServiceID);
-        $stmt->bindParam(":appointmentdatetime", $this->AppointmentDateTime);
-        $stmt->bindParam(":status", $this->Status);
-        $stmt->bindParam(":notes", $this->Notes);
-        $stmt->bindParam(":appointmentid", $this->AppointmentID);
-
-        if ($stmt->execute()) {
-            return true;
+            $query = "UPDATE " . $this->table_name . "
+                      SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid,
+                          AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes
+                      WHERE AppointmentID=:appointmentid";
+            
+            $stmt = $this->conn->prepare($query);
+            
+            // Sanitize inputs
+            $this->CustomerID = htmlspecialchars(strip_tags($this->CustomerID));
+            $this->StaffID = htmlspecialchars(strip_tags($this->StaffID));
+            $this->ServiceID = htmlspecialchars(strip_tags($this->ServiceID));
+            $this->AppointmentDateTime = htmlspecialchars(strip_tags($this->AppointmentDateTime));
+            $this->Status = htmlspecialchars(strip_tags($this->Status));
+            $this->Notes = htmlspecialchars(strip_tags($this->Notes));
+            $this->AppointmentID = htmlspecialchars(strip_tags($this->AppointmentID));
+            
+            // Bind parameters
+            $stmt->bindParam(":customerid", $this->CustomerID);
+            $stmt->bindParam(":staffid", $this->StaffID);
+            $stmt->bindParam(":serviceid", $this->ServiceID);
+            $stmt->bindParam(":appointmentdatetime", $this->AppointmentDateTime);
+            $stmt->bindParam(":status", $this->Status);
+            $stmt->bindParam(":notes", $this->Notes);
+            $stmt->bindParam(":appointmentid", $this->AppointmentID);
+            
+            if ($stmt->execute()) {
+                return true;
+            }
+            return false;
+        } catch (InvalidArgumentException $e) {
+            // Log the error and return false or throw a custom exception
+            error_log("Validation error in Appointment::update(): " . $e->getMessage());
+            return false;
+        } catch (PDOException $e) {
+            // Log the database error and return false or throw a custom exception
+            error_log("Database error in Appointment::update(): " . $e->getMessage());
+            return false;
         }
-        return false;
     }
 
     public function delete()
@@ -92,18 +140,26 @@ class Appointment
         return false;
     }
 
-    public function fetch($id = null)
+    public function fetch($id)
     {
         $query = "SELECT * FROM " . $this->table_name;
         if ($id) {
-            $query .= " WHERE AppointmentID = ?";
+            $query .= " WHERE AppointmentID = :id";
         }
         $stmt = $this->conn->prepare($query);
 
         if ($id) {
-            $stmt->bindParam(1, $id);
+            $stmt->bindParam("id", $id);
         }
 
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function fetchByUserId($userId) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE CustomerID = :customerid";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":customerid", $userId);
         $stmt->execute();
         return $stmt;
     }

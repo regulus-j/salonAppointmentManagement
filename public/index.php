@@ -13,7 +13,7 @@ session_start(); // Start the session at the beginning of the script
 
 <body>
     <h1>Navigate Site</h1>
-    <a href="../src/view/user/sign-up.php">Sign up Users</a>
+    <a href="../src/view/login.php">Sign up Users</a>
     <h1>
         <!-- Check if 'userid' is set before trying to access it -->
         <?= isset($_SESSION['userid']) ? htmlspecialchars($_SESSION['userid']) : 'No user ID set' ?>

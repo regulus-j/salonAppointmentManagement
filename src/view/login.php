@@ -80,7 +80,7 @@
 <body>
     <div class="login-container">
         <h1>Login</h1>
-        <form action="../../controller/login.php" method="post">
+        <form action="../controller/login.php" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
 
@@ -91,10 +91,23 @@
         </form>
 
         <div class="links">
-            <p><a href="#">Forgot Password?</a></p>
-            <p>Don't have an account? <a href="#">Register</a></p>
+            <p><a href="forgotpassword.php">Forgot Password?</a></p>
+            <p>Don't have an account? <a href="customer\register.php">Register</a></p>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there's an error message in the session
+        <?php
+        session_start();
+        if (isset($_SESSION['message'])) {
+            echo "alert('" . addslashes($_SESSION['message']) . "');";
+            unset($_SESSION['message']); // Clear the message after displaying it
+        }
+        ?>
+    });
+    </script>
 </body>
 
 </html>

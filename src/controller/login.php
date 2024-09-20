@@ -1,18 +1,26 @@
 <?php
 session_start();
 
-// Database connection parameters
-$host = 'localhost'; // Replace with your database host
-$dbname = 'salonManagement'; // Replace with your database name
-$username = 'root'; // Replace with your database username
-$password = ''; // Replace with your database password
+// Include the database connection class
+require_once __DIR__ . '/../model/db.class.php';
 
-// Create a new PDO instance
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+// Function to redirect based on user type
+function redirectByUserType($userType) {
+    switch ($userType) {
+        case 'Customer':
+            header('Location: ../view/customer/home.php');
+            break;
+        case 'Admin':
+            header('Location: ../view/admin/index.php');
+            break;
+        case 'Staff':
+            header('Location: ../view/staff/index.php');
+            break;
+        default:
+            // If an unknown user type is encountered, redirect to a default page
+            header('Location: ../../public/index.php');
+    }
+    exit;
 }
 
 // Check if form is submitted
@@ -24,15 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate input
     if (empty($username) || empty($password)) {
         $_SESSION['message'] = 'Please enter both username and password.';
-        header('Location: index.php'); // Redirect back to login page
+        header('Location: ../view/customer/login.php'); // Redirect back to login page
         exit;
     }
 
+    // Create database connection
+    $database = new Database();
+    $db = $database->getConnection();
+
     // Prepare and execute query to check if user exists
-    $stmt = $pdo->prepare('SELECT UserID, PasswordHash, UserType, IsActive FROM User WHERE Username = :username LIMIT 1');
+    $stmt = $db->prepare('SELECT UserID, PasswordHash, UserType, IsActive FROM User WHERE Username = :username LIMIT 1');
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
     $stmt->execute();
-
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
@@ -42,9 +53,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Password is correct and user is active
                 $_SESSION['user_id'] = $user['UserID'];
                 $_SESSION['user_type'] = $user['UserType'];
+
+                // Update LastLogin
+                $updateStmt = $db->prepare('UPDATE User SET LastLogin = NOW() WHERE UserID = :userId');
+                $updateStmt->execute(['userId' => $user['UserID']]);
+
                 $_SESSION['message'] = 'Login successful.';
-                header('Location: ../../public/index.php'); // Redirect to a dashboard or home page
-                exit;
+               
+                // Redirect based on user type
+                redirectByUserType($user['UserType']);
             } else {
                 $_SESSION['message'] = 'Your account is not active.';
             }
@@ -56,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Redirect back to login page with message
-    header('Location: index.php');
+    header('Location: ../view/customer/login.php');
     exit;
 } else {
     // Not a POST request
-    header('Location: index.php');
+    header('Location: ../view/customer/login.php');
     exit;
 }
 ?>
