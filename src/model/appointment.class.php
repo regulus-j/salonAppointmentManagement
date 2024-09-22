@@ -86,7 +86,7 @@ class Appointment
     {
         try {
             $this->validateInput();
-
+    
             $query = "UPDATE " . $this->table_name . "
                       SET CustomerID=:customerid, StaffID=:staffid, ServiceID=:serviceid,
                           AppointmentDateTime=:appointmentdatetime, Status=:status, Notes=:notes

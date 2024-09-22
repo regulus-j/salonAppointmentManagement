@@ -125,7 +125,7 @@
             <button type="submit">Register</button>
 
             <div class="links">
-                <p>Already have an account? <a href="login.php">Login</a></p>
+                <p>Already have an account? <a href="../login.php">Login</a></p>
             </div>
         </form>
     </div>

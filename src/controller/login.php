@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate input
     if (empty($username) || empty($password)) {
         $_SESSION['message'] = 'Please enter both username and password.';
-        header('Location: ../view/customer/login.php'); // Redirect back to login page
+        header('Location: ../view/login.php'); // Redirect back to login page
         exit;
     }
 
@@ -73,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Redirect back to login page with message
-    header('Location: ../view/customer/login.php');
+    header('Location: ../view/login.php');
     exit;
 } else {
     // Not a POST request
-    header('Location: ../view/customer/login.php');
+    header('Location: ../view/login.php');
     exit;
 }
 ?>

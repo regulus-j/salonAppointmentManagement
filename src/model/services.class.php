@@ -80,12 +80,12 @@ class Service {
     public function fetch($id = null) {
         $query = "SELECT * FROM " . $this->table_name;
         if($id) {
-            $query .= " WHERE ServiceID = ?";
+            $query .= " WHERE ServiceID = :id";
         }
         $stmt = $this->conn->prepare($query);
         
         if($id) {
-            $stmt->bindParam(1, $id);
+            $stmt->bindParam(":id", $id);
         }
 
         $stmt->execute();

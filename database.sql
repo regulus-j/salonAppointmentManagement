@@ -1,120 +1,139 @@
--- Salon Management System Database Schema (Updated)
+-- Create the appointment table
+CREATE TABLE `appointment` (
+  `AppointmentID` int(11) NOT NULL AUTO_INCREMENT,
+  `CustomerID` int(11) DEFAULT NULL,
+  `StaffID` int(11) DEFAULT NULL,
+  `ServiceID` int(11) DEFAULT NULL,
+  `AppointmentDateTime` datetime DEFAULT NULL,
+  `Status` varchar(20) DEFAULT NULL,
+  `Notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`AppointmentID`),
+  KEY `CustomerID` (`CustomerID`),
+  KEY `StaffID` (`StaffID`),
+  KEY `ServiceID` (`ServiceID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- User Table (for authentication)
-CREATE TABLE User (
-    UserID INT PRIMARY KEY,
-    Username VARCHAR(50) UNIQUE,
-    PasswordHash VARCHAR(255),
-    Email VARCHAR(100) UNIQUE,
-    UserType ENUM('Customer', 'Staff', 'Admin'),
-    LastLogin DATETIME,
-    IsActive BOOLEAN DEFAULT TRUE
-);
+-- Create the customer table
+CREATE TABLE `customer` (
+  `CustomerID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserID` int(11) DEFAULT NULL,
+  `FirstName` varchar(50) DEFAULT NULL,
+  `LastName` varchar(50) DEFAULT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  `DateOfBirth` date DEFAULT NULL,
+  `JoinDate` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`CustomerID`),
+  UNIQUE KEY `UserID` (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Staff Table (modified)
-CREATE TABLE Staff (
-    StaffID INT PRIMARY KEY,
-    UserID INT UNIQUE,
-    FirstName VARCHAR(50),
-    LastName VARCHAR(50),
-    Phone VARCHAR(20),
-    Role VARCHAR(50),
-    HireDate DATE,
-    FOREIGN KEY (UserID) REFERENCES User(UserID)
-);
+-- Create the feedback table
+CREATE TABLE `feedback` (
+  `FeedbackID` int(11) NOT NULL AUTO_INCREMENT,
+  `AppointmentID` int(11) DEFAULT NULL,
+  `Rating` int(11) DEFAULT NULL,
+  `Comment` text DEFAULT NULL,
+  `FeedbackDate` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`FeedbackID`),
+  KEY `AppointmentID` (`AppointmentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Service Table (unchanged)
-CREATE TABLE Service (
-    ServiceID INT PRIMARY KEY,
-    ServiceName VARCHAR(100),
-    Description TEXT,
-    Duration INT, -- in minutes
-    Price DECIMAL(10, 2)
-);
+-- Create the inventory table
+CREATE TABLE `inventory` (
+  `InventoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `ProductName` varchar(100) DEFAULT NULL,
+  `Description` text DEFAULT NULL,
+  `Quantity` int(11) DEFAULT NULL,
+  `ReorderLevel` int(11) DEFAULT NULL,
+  `UnitPrice` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`InventoryID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Customer Table (modified)
-CREATE TABLE Customer (
-    CustomerID INT PRIMARY KEY,
-    UserID INT UNIQUE,
-    FirstName VARCHAR(50),
-    LastName VARCHAR(50),
-    Phone VARCHAR(20),
-    DateOfBirth DATE,
-    JoinDate DATE,
-    FOREIGN KEY (UserID) REFERENCES User(UserID)
-);
+-- Create the sales table
+CREATE TABLE `sales` (
+  `SaleID` int(11) NOT NULL AUTO_INCREMENT,
+  `AppointmentID` int(11) DEFAULT NULL,
+  `SaleDate` date DEFAULT NULL,
+  `TotalAmount` decimal(10,2) DEFAULT NULL,
+  `PaymentMethod` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`SaleID`),
+  KEY `AppointmentID` (`AppointmentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Appointment Table (unchanged)
-CREATE TABLE Appointment (
-    AppointmentID INT PRIMARY KEY,
-    CustomerID INT,
-    StaffID INT,
-    ServiceID INT,
-    AppointmentDateTime DATETIME,
-    Status VARCHAR(20), -- e.g., Scheduled, Completed, Cancelled
-    Notes TEXT,
-    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
-    FOREIGN KEY (StaffID) REFERENCES Staff(StaffID),
-    FOREIGN KEY (ServiceID) REFERENCES Service(ServiceID)
-);
+-- Create the service table
+CREATE TABLE `service` (
+  `ServiceID` int(11) NOT NULL AUTO_INCREMENT,
+  `ServiceName` varchar(100) DEFAULT NULL,
+  `Description` text DEFAULT NULL,
+  `Duration` int(11) DEFAULT NULL,
+  `Price` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ServiceID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Schedule Table (unchanged)
-CREATE TABLE Schedule (
-    ScheduleID INT PRIMARY KEY,
-    StaffID INT,
-    WorkDate DATE,
-    StartTime TIME,
-    EndTime TIME,
-    FOREIGN KEY (StaffID) REFERENCES Staff(StaffID)
-);
+-- Create the staff table
+CREATE TABLE `staff` (
+  `StaffID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserID` int(11) DEFAULT NULL,
+  `FirstName` varchar(50) DEFAULT NULL,
+  `LastName` varchar(50) DEFAULT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  `Role` varchar(50) DEFAULT NULL,
+  `HireDate` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`StaffID`),
+  UNIQUE KEY `UserID` (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Inventory Table (unchanged)
-CREATE TABLE Inventory (
-    InventoryID INT PRIMARY KEY,
-    ProductName VARCHAR(100),
-    Description TEXT,
-    Quantity INT,
-    ReorderLevel INT,
-    UnitPrice DECIMAL(10, 2)
-);
+-- Create the user table
+CREATE TABLE `user` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `Username` varchar(50) DEFAULT NULL,
+  `PasswordHash` varchar(255) DEFAULT NULL,
+  `Email` varchar(100) DEFAULT NULL,
+  `UserType` enum('Customer','Staff','Admin') DEFAULT NULL,
+  `LastLogin` datetime DEFAULT NULL,
+  `IsActive` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`UserID`),
+  UNIQUE KEY `Username` (`Username`),
+  UNIQUE KEY `Email` (`Email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Sales Table (unchanged)
-CREATE TABLE Sales (
-    SaleID INT PRIMARY KEY,
-    AppointmentID INT,
-    SaleDate DATE,
-    TotalAmount DECIMAL(10, 2),
-    PaymentMethod VARCHAR(50),
-    FOREIGN KEY (AppointmentID) REFERENCES Appointment(AppointmentID)
-);
-
--- SaleItem Table (unchanged)
-CREATE TABLE SaleItem (
-    SaleItemID INT PRIMARY KEY,
-    SaleID INT,
+CREATE TABLE ServiceInventory (
+    ServiceInventoryID INT PRIMARY KEY AUTO_INCREMENT,
     ServiceID INT,
     InventoryID INT,
-    Quantity INT,
-    UnitPrice DECIMAL(10, 2),
-    FOREIGN KEY (SaleID) REFERENCES Sales(SaleID),
+    QuantityRequired INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (ServiceID) REFERENCES Service(ServiceID),
     FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
 );
 
--- Feedback Table (unchanged)
-CREATE TABLE Feedback (
-    FeedbackID INT PRIMARY KEY,
-    AppointmentID INT,
-    Rating INT,
-    Comment TEXT,
-    FeedbackDate DATE,
-    FOREIGN KEY (AppointmentID) REFERENCES Appointment(AppointmentID)
-);
+-- Add the necessary foreign key constraints
+ALTER TABLE `appointment`
+  ADD CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`CustomerID`) REFERENCES `customer` (`CustomerID`),
+  ADD CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`StaffID`) REFERENCES `staff` (`StaffID`),
+  ADD CONSTRAINT `appointment_ibfk_3` FOREIGN KEY (`ServiceID`) REFERENCES `service` (`ServiceID`);
 
--- New table for user permissions
-CREATE TABLE UserPermission (
-    PermissionID INT PRIMARY KEY,
-    UserID INT,
-    PermissionName VARCHAR(50),
-    FOREIGN KEY (UserID) REFERENCES User(UserID)
-);
+ALTER TABLE `feedback`
+  ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`AppointmentID`) REFERENCES `appointment` (`AppointmentID`);
+
+ALTER TABLE `sales`
+  ADD CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`AppointmentID`) REFERENCES `appointment` (`AppointmentID`);
+
+ALTER TABLE `staff`
+  ADD CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `user` (`UserID`);
