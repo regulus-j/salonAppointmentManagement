@@ -1,12 +1,6 @@
 <?php
 session_start();
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
-}
-
 // Include necessary files
 require_once '../../model/db.class.php';
 require_once '../../model/appointment.class.php';
@@ -15,11 +9,29 @@ require_once '../../model/appointment.class.php';
 $database = new Database();
 $db = $database->getConnection();
 
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
+// Fetch customer_id from user_id
+$stmt = $db->prepare("SELECT CustomerID FROM customer WHERE UserID = :user_id");
+$stmt->bindParam(':user_id', $_SESSION['user_id']);
+$stmt->execute();
+
+if ($stmt->rowCount() > 0) {
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $customer_id = $row['CustomerID'];
+} else {
+    die("Error: No customer profile found for this user.");
+}
+
 // Create appointment object
 $appointment = new Appointment($db);
 
 // Fetch appointments for the logged-in user
-$stmt = $appointment->fetchByUserId($_SESSION['user_id']);
+$stmt = $appointment->fetchByUserId($customer_id);
 $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
@@ -92,18 +104,23 @@ $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($appointments as $appt): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($appt['AppointmentID']); ?></td>
-                            <td><?php echo htmlspecialchars($appt['AppointmentDateTime']); ?></td>
-                            <td><?php echo htmlspecialchars($appt['ServiceID']); ?></td>
-                            <td><?php echo htmlspecialchars($appt['StaffID']); ?></td>
-                            <td><?php echo htmlspecialchars($appt['Status']); ?></td>
-                            <td class="action-links">
-                                <a href="edit_appointment.php?id=<?php echo $appt['AppointmentID']; ?>">Edit</a>
-                                <a href="..\..\controller\customer\cancel_appointment.php?id=<?php echo $appt['AppointmentID']; ?>" onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</a>                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                <?php foreach ($appointments as $appt): 
+                // Convert the AppointmentDateTime to a more readable format
+                $dateTime = new DateTime($appt['AppointmentDateTime']);
+                $formattedDateTime = $dateTime->format('F j, Y, g:i A'); // Example: September 22, 2024, 2:30 PM
+                ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($appt['AppointmentID']); ?></td>
+                    <td><?php echo htmlspecialchars($formattedDateTime); ?></td>
+                    <td><?php echo htmlspecialchars($appt['ServiceName']); ?></td>
+                    <td><?php echo htmlspecialchars($appt['staffName']); ?></td>
+                    <td><?php echo htmlspecialchars($appt['Status']); ?></td>
+                    <td class="action-links">
+                        <a href="edit_appointment.php?id=<?php echo $appt['AppointmentID']; ?>">Edit</a>
+                        <a href="..\..\controller\customer\cancel_appointment.php?id=<?php echo $appt['AppointmentID']; ?>" onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
                 </tbody>
             </table>
         <?php endif; ?>

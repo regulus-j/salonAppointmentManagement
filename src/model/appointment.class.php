@@ -157,10 +157,55 @@ class Appointment
     }
 
     public function fetchByUserId($userId) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE CustomerID = :customerid";
+        $query = "SELECT 
+                    a.AppointmentID, 
+                    a.CustomerID, 
+                    a.ServiceID, 
+                    a.AppointmentDateTime, 
+                    a.Status, 
+                    a.Notes, 
+                    s.StaffID, 
+                    CONCAT(s.FirstName, ' ', s.LastName) as staffName, 
+                    s.Phone, 
+                    s.Role, 
+                    sv.ServiceName
+                  FROM 
+                    " . $this->table_name . " a
+                  JOIN 
+                    staff s 
+                  ON 
+                    a.StaffID = s.StaffID
+                  JOIN 
+                    service sv 
+                  ON 
+                    a.ServiceID = sv.ServiceID
+                  WHERE 
+                    a.CustomerID = :customerid";
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":customerid", $userId);
         $stmt->execute();
         return $stmt;
+    }       
+
+    public function cancelAppointment($id)
+    {
+        $query = "UPDATE " . $this->table_name . " SET Status = 'Cancelled'";
+    
+        if ($id) {
+            $query .= " WHERE AppointmentID = :id";
+        }
+    
+        $stmt = $this->conn->prepare($query);
+    
+        if ($id) {
+            $stmt->bindParam(":id", $id);
+        }
+    
+        if ($stmt->execute()) {
+            return true; // Successfully cancelled
+        } else {
+            return false; // Failed to cancel
+        }
     }
 }
